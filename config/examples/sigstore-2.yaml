@@ -1,0 +1,47 @@
+settings:
+  name: gosst
+  repos:
+    - https://github.com/sigstore/cosign
+    - https://github.com/sigstore/rekor
+    - https://github.com/sigstore/fulcio
+
+collections:
+  - id: Pull Requests
+    name: All Pull Requests
+    description: >
+     Pull requests in need of attention
+    rules:
+      - prs-cosign
+      - prs-fulcio
+      - prs-rekor
+
+rules:
+  prs-cosign:
+    name: "Cosign PRs"
+    type: pull_request
+    resolution: "Review requests or mark them as do-not-merge/work-in-progress"
+    filters:
+      - title: "!.*(WIP|wip).*"
+      - tag: "!changes-requested"
+    repos:
+      - https://github.com/sigstore/cosign
+
+  prs-fulcio:
+    name: "Fulcio PRs"
+    type: pull_request
+    resolution: "Review requests or mark them as do-not-merge/work-in-progress"
+    filters:
+      - title: "!.*(WIP|wip).*"
+      - tag: "!changes-requested"
+    repos:
+      - https://github.com/sigstore/fulcio
+
+  prs-rekor:
+    name: "Rekor PRs"
+    type: pull_request
+    resolution: "Review requests or mark them as do-not-merge/work-in-progress"
+    filters:
+      - title: "!.*(WIP|wip).*"
+      - tag: "!changes-requested"
+    repos:
+      - https://github.com/sigstore/rekor
