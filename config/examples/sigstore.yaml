@@ -54,6 +54,8 @@ collections:
     description: >
       Status of issues across repos
     rules:
+      # Bugs
+      - bugs
       # SLO
       - issue-near-soon-overdue
       - issue-near-longterm-overdue
@@ -136,6 +138,12 @@ rules:
       - label: "priority/important-longterm"
       - updated: +180d
  
+  # Open bugs
+  bugs:
+    name: Open bugs
+    type: issue
+    fiters:
+      - label: "bug"
  
   # Issues missing initial feedback
   issue-needs-kind:

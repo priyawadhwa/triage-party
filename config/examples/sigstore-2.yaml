@@ -4,10 +4,11 @@ settings:
     - https://github.com/sigstore/cosign
     - https://github.com/sigstore/rekor
     - https://github.com/sigstore/fulcio
+    - https://github.com/google/oss-fuzz
 
 collections:
   - id: Pull Requests
-    name: All Pull Requests
+    name: Sigstore PRs
     description: >
      Pull requests in need of attention
     rules:
@@ -16,15 +17,22 @@ collections:
       - prs-rekor
       - pr-approved-stale
       - pr-unapproved-stale
+  - id: PRs - fuzzing
+    name: OSS Fuzz PRs
+    description: >
+      Status of PRs in OSS-Fuzz
+    rules:
+      - prs-fuzz
+      - fuzz-pr-approved-stale
+      - fuzz-pr-unapproved-stale
   - id: Issues
     name: Issues
     dedup: true
     description: >
       Status of issues across repos
     rules:
-      # SLO
-      - issue-near-soon-overdue
-      - issue-near-longterm-overdue
+      # Bugs
+      - bugs
       # Issues needing reprioritization
       - many-reactions
       - many-commenters
@@ -37,7 +45,7 @@ collections:
       - issue-has-question
       - issue-updated-support
 
-  
+
 rules:
   ### Pull requests
   prs-cosign:
@@ -70,43 +78,68 @@ rules:
     repos:
       - https://github.com/sigstore/rekor
 
+  prs-fuzz:
+    name: "OSS Fuzz PRs"
+    type: pull_request
+    resolution: "Review requests or mark them as do-not-merge/work-in-progress"
+    filters:
+      - title: "!.*(WIP|wip).*"
+      - tag: "!(changes-requested|draft|approved)"
+    repos:
+      - https://github.com/google/oss-fuzz
+
   # PR's needing closure
+  fuzz-pr-approved-stale:
+    name: "Pull requests: Approved and getting old"
+    resolution: "Merge PR"
+    type: pull_request
+    filters:
+      - label: "approved"
+      - updated: +2d
+      - responded: +1d
+    repos:
+      - https://github.com/google/oss-fuzz
+
+  fuzz-pr-unapproved-stale:
+    name: "Pull Requests: Stale"
+    resolution: "Add comment and/or close PR"
+    type: pull_request
+    filters:
+      - created: +3d
+      - updated: +2d
+      - responded: +1d
+      - tag: "!draft"
+    repos:
+      - https://github.com/google/oss-fuzz
+
   pr-approved-stale:
     name: "Pull requests: Approved and getting old"
     resolution: "Merge PR"
     type: pull_request
     filters:
-      - label: "!do-not-merge.*"
-      - label: "!needs-rebase"
       - label: "approved"
       - updated: +5d
       - responded: +2d
 
   pr-unapproved-stale:
     name: "Pull Requests: Stale"
-    resolution: "Add comment and/or close PR"
     type: pull_request
+    resolution: "Add comment and/or close PR"
     filters:
       - created: +20d
       - updated: +5d
       - responded: +2d
 
+  
   ### Issues
-  issue-near-soon-overdue:
-    name: "Important soon, but no updates in 60 days"
-    resolution: "Downgrade to important-longterm"
-    type: issue
-    filters:
-      - label: "priority/important-soon"
-      - updated: +60d
 
-  issue-near-longterm-overdue:
-    name: "Important longterm, but no updates in 120 days"
-    resolution: "Downgrade to backlog"
+  # Open bugs
+  bugs:
+    name: Open bugs
     type: issue
-    filters:
-      - label: "priority/important-longterm"
-      - updated: +120d
+    resolution: ~ fix that bug ~
+    fiters:
+      - label: "bug"
 
   many-reactions:
     name: "many reactions, low priority"
