@@ -32,15 +32,15 @@ collections:
       Status of issues across repos
     rules:
       # People with questions
-      - issue-has-question
-      - issue-updated-support
+      - fuzz-issue-has-question
+      - fuzz-issue-updated-support
       # fuzzing issues
       - fuzz-bugs
       - fuzz-priority
       # Issues needing reprioritization
-      - many-reactions
-      - many-commenters
-      - issue-zombies
+      - fuzz-many-reactions
+      - fuzz-many-commenters
+      - fuzz-issue-zombies
 
 
 rules:
@@ -155,15 +155,17 @@ rules:
       - https://github.com/google/oss-fuzz
 
 
-  many-reactions:
+  fuzz-many-reactions:
     name: "many reactions, low priority"
     resolution: "Upgrade to priority-soon, priority-longterm, or longterm-support"
     filters:
       - reactions: ">3"
       - reactions-per-month: ">0.75"
       - label: "!priority"
+    repos:
+      - https://github.com/google/oss-fuzz
 
-  many-commenters:
+  fuzz-many-commenters:
     name: "many commenters, low priority"
     resolution: "Upgrade to priority"
     filters:
@@ -171,8 +173,10 @@ rules:
       - commenters-per-month: ">1.9"
       - created: "+30d"
       - label: "!priority"
+    repos:
+      - https://github.com/google/oss-fuzz
 
-  issue-zombies:
+  fuzz-issue-zombies:
     name: "Screaming into the void"
     resolution: "Reopen, or ask folks to open a new issue"
     type: issue
@@ -181,10 +185,11 @@ rules:
       - updated: -7d
       - tag: recv
       - comments-while-closed: ">1"
-
+    repos:
+      - https://github.com/google/oss-fuzz
 
   # People with questions
-  issue-has-question:
+  fuzz-issue-has-question:
     name: "Overdue answers for a question"
     resolution: "Add a comment"
     type: issue
@@ -193,8 +198,10 @@ rules:
       - tag: "!member-last"
       - tag: "!contributor-last"
       - responded: +6d
+    repos:
+      - https://github.com/google/oss-fuzz
 
-  issue-updated-support:
+  fuzz-issue-updated-support:
     name: "Open support requests"
     resolution: "Add a comment"
     type: issue
@@ -203,3 +210,5 @@ rules:
       - tag: "!member-last"
       - tag: "!contributor-last"
       - responded: +6d
+    repos:
+      - https://github.com/google/oss-fuzz
