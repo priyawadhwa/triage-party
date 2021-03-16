@@ -1,0 +1,207 @@
+# Copyright 2020 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+settings:
+  name: gosst
+  min_similarity: 0.8
+  repos:
+    - https://github.com/sigstore/cosign
+    - https://github.com/sigstore/rekor
+    - https://github.com/sigstore/fulcio
+
+  # Who should automatically be considered a project member?
+  # See: https://developer.github.com/v4/enum/commentauthorassociation/
+  # Default is "collaborator, owner, member", unless "members" is set
+  #
+  #member-roles:
+  # - collaborator
+  # - owner
+  # - member
+  # Who else do we consider to be a project member? Default is empty.
+  #members:
+  # - tstromberg
+
+collections:
+  - id: Pull Requests
+    name: Pull Requests
+    dedup: true
+    description: >
+      The status of all open PRs
+    rules:
+      # Don't leave code reviews hanging
+      - rekor-pr-reviewable
+      - fulcio-pr-reviewable
+      - cosign-pr-reviewable
+
+      # PR's needing closure
+      - pr-approved-stale
+      - pr-unapproved-stale
+
+  - id: Triage
+    name: Triage
+    dedup: true
+    description: >
+      Status of issues across repos
+    rules:
+      # SLO
+      - issue-near-soon-overdue
+      - issue-near-longterm-overdue
+      # Issues needing reprioritization
+      - many-reactions
+      - many-commenters
+      - issue-zombies
+      # Issues needing closure
+      - issue-stale-needs-info
+      - issue-stale-support
+      - lifecycle-rotten
+      # People with questions
+      - issue-has-question
+      - issue-updated-support
+
+rules:
+  ### Daily Triage ####
+  issue-needs-priority-overdue:
+    name: "Unprioritized issues older than 7 days"
+    resolution: "Add a priority/ or triage/ label"
+    type: issue
+    filters:
+      - label: "!priority/.*"
+      - label: "!triage/.*"
+      - created: +7d
+
+  issue-needs-comment-overdue:
+    name: "Uncommented older than 7 days"
+    resolution: "Add a priority/ or triage/ label"
+    type: issue
+    filters:
+      - tag: "!commented"
+      - tag: "recv"
+      - created: +7d
+
+  issue-soon-overdue:
+    name: "Important soon, but no updates in 90 days"
+    resolution: "Downgrade to important-longterm"
+    type: issue
+    filters:
+      - label: "priority/important-soon"
+      - updated: +90d
+
+  issue-longterm-overdue:
+    name: "Important longterm, but no updates in 180 days"
+    resolution: "Downgrade to backlog"
+    type: issue
+    filters:
+      - label: "priority/important-longterm"
+      - updated: +180d
+
+  # Don't leave code reviews hanging
+  fulcio-pr-reviewable:
+    name: "Fulcio Pull Requests: Review Ready"
+    resolution: "Review requests or mark them as do-not-merge/work-in-progress"
+    type: pull_request
+    filters:
+      - title: "!.*(WIP|wip).*"
+      - tag: "!changes-requested"
+    repos:
+      - https://github.com/sigstore/fulcio
+
+  rekor-pr-reviewable:
+    name: "Rekor Pull Requests: Review Ready"
+    resolution: "Review requests or mark them as do-not-merge/work-in-progress"
+    type: pull_request
+    filters:
+      - title: "!.*(WIP|wip).*"
+      - tag: "!changes-requested"
+    repos:
+      - https://github.com/sigstore/rekor
+
+  cosign-pr-reviewable:
+    name: "Cosign Pull Requests: Review Ready"
+    resolution: "Review requests or mark them as do-not-merge/work-in-progress"
+    type: pull_request
+    filters:
+      - title: "!.*(WIP|wip).*"
+      - tag: "!changes-requested"
+    repos:
+      - https://github.com/sigstore/cosign
+
+  # Issues missing initial feedback
+  issue-needs-kind:
+    name: "Unkinded Issues"
+    resolution: "Add a kind/ label"
+    type: issue
+    filters:
+      - label: "!kind/.*"
+      - label: "!kind/support"
+
+  issue-needs-priority:
+    name: "Unprioritized Recent Issues"
+    resolution: "Add a priority/ or triage/ label"
+    type: issue
+    filters:
+      - label: "!priority/.*"
+      - label: "!triage/.*"
+
+  issue-needs-comment:
+    name: "Uncommented Recent Issues"
+    resolution: "Add a comment"
+    type: issue
+    filters:
+      - tag: "!commented"
+      - tag: "recv"
+      - created: -7d
+
+  # Issues that may need reprioritized
+  issue-new-with-reactions:
+    name: "New, has multiple reactions, but not important-soon"
+    resolution: "Check if issue should be prioritized as important-soon"
+    type: issue
+    filters:
+      - reactions: ">2"
+      - created: -10d
+      - tag: "!send"
+      - label: "!priority/important-soon"
+
+  issue-new-with-many-commenters:
+    name: "New, has multiple commenters, but not important-soon"
+    resolution: "Check if issue should be prioritized as important-soon"
+    type: issue
+    filters:
+      - commenters: ">3"
+      - created: -10d
+      - tag: "!send"
+      - label: "!priority/important-soon"
+
+  # Don't forget our users
+  issue-updated-needs-info:
+    name: "needs information, has update"
+    resolution: "Comment and remove triage/needs-information tag"
+    type: issue
+    filters:
+      - label: triage/needs-information
+      - tag: recv
+
+  issue-updated-has-question:
+    name: "Recently updated issue has a question"
+    resolution: "Add an answer"
+    type: issue
+    filters:
+      - tag: recv-q
+      - label: "!triage/needs-information"
+      - tag: "!member-last"
+      - tag: "!contributor-last"
+      - responded: +3d
+      - updated: -7d
+
+ 
