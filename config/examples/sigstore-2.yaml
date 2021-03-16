@@ -25,25 +25,22 @@ collections:
       - prs-fuzz
       - fuzz-pr-approved-stale
       - fuzz-pr-unapproved-stale
-  - id: Issues
-    name: Issues
+  - id: Fuzzing Issues
+    name: Fuzzing Issues
     dedup: true
     description: >
       Status of issues across repos
     rules:
-      # Bugs
-      - bugs
+      # People with questions
+      - issue-has-question
+      - issue-updated-support
+      # fuzzing issues
+      - fuzz-bugs
+      - fuzz-priority
       # Issues needing reprioritization
       - many-reactions
       - many-commenters
       - issue-zombies
-      # Issues needing closure
-      - issue-stale-needs-info
-      - issue-stale-support
-      - lifecycle-rotten
-      # People with questions
-      - issue-has-question
-      - issue-updated-support
 
 
 rules:
@@ -133,13 +130,30 @@ rules:
   
   ### Issues
 
-  # Open bugs
-  bugs:
-    name: Open bugs
+  # Stuff for fuzzing issues
+  fuzz-bugs:
+    name: "Fuzzing bugs that have not been commented on for 6 months"
+    resolution: "comment a status update"
     type: issue
-    resolution: ~ fix that bug ~
-    fiters:
+    filters:
       - label: "bug"
+      - responded: +180d
+      - tag: "!member-last"
+    repos:
+      - https://github.com/google/oss-fuzz
+
+
+  fuzz-priority:
+    name: "Fuzzing priority issues that have not been commented on for 6 months"
+    resolution: "comment a status update"
+    type: issue
+    filters:
+      - label: "priority"
+      - responded: +180d
+      - tag: "!member-last"
+    repos:
+      - https://github.com/google/oss-fuzz
+
 
   many-reactions:
     name: "many reactions, low priority"
@@ -147,20 +161,16 @@ rules:
     filters:
       - reactions: ">3"
       - reactions-per-month: ">0.75"
-      - label: "!priority/important-soon"
-      - label: "!priority/important-longterm"
-      - label: "!long-term-support"
+      - label: "!priority"
 
   many-commenters:
     name: "many commenters, low priority"
-    resolution: "Upgrade to priority-soon, priority-longterm, or longterm-support"
+    resolution: "Upgrade to priority"
     filters:
       - commenters: ">2"
       - commenters-per-month: ">1.9"
       - created: "+30d"
-      - label: "!priority/important-soon"
-      - label: "!priority/important-longterm"
-      - label: "!long-term-support"
+      - label: "!priority"
 
   issue-zombies:
     name: "Screaming into the void"
@@ -171,30 +181,7 @@ rules:
       - updated: -7d
       - tag: recv
       - comments-while-closed: ">1"
-  
-  # Issues needing closure
-  issue-stale-needs-info:
-    name: "Needs information for over 2 weeks"
-    resolution: "Close or remove triage/needs-information label"
-    type: issue
-    filters:
-      - label: triage/needs-information
-      - updated: +13d
 
-  issue-stale-support:
-    name: "Support request over 30 days old"
-    resolution: "Close, or add to triage/long-term-support"
-    type: issue
-    filters:
-      - label: kind/support
-      - label: "!long-term-support"
-      - updated: +29d
-
-  lifecycle-rotten:
-    name: "Issues nearing expiration"
-    resolution: "Close or label as frozen"
-    filters:
-      - label: lifecycle/rotten
 
   # People with questions
   issue-has-question:
@@ -203,18 +190,16 @@ rules:
     type: issue
     filters:
       - tag: recv-q
-      - label: "!triage/needs-information"
       - tag: "!member-last"
       - tag: "!contributor-last"
       - responded: +6d
 
   issue-updated-support:
-    name: "Updated support requests"
-    resolution: "Move out of support, or add a comment"
+    name: "Open support requests"
+    resolution: "Add a comment"
     type: issue
     filters:
       - tag: recv
-      - label: "!triage/needs-information"
       - tag: "!member-last"
       - tag: "!contributor-last"
       - responded: +6d
