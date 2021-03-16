@@ -70,7 +70,38 @@ collections:
       - issue-updated-support
 
 rules:
-  ### Daily Triage ####
+  # Don't leave code reviews hanging
+  fulcio-pr-reviewable:
+    name: "Fulcio Pull Requests: Review Ready"
+    resolution: "Review requests or mark them as do-not-merge/work-in-progress"
+    type: pull_request
+    filters:
+      - title: "!.*(WIP|wip).*"
+      - tag: "!changes-requested"
+    repos:
+      - https://github.com/sigstore/fulcio
+
+  rekor-pr-reviewable:
+    name: "Rekor Pull Requests: Review Ready"
+    resolution: "Review requests or mark them as do-not-merge/work-in-progress"
+    type: pull_request
+    filters:
+      - title: "!.*(WIP|wip).*"
+      - tag: "!changes-requested"
+    repos:
+      - https://github.com/sigstore/rekor
+
+  cosign-pr-reviewable:
+    name: "Cosign Pull Requests: Review Ready"
+    resolution: "Review requests or mark them as do-not-merge/work-in-progress"
+    type: pull_request
+    filters:
+      - title: "!.*(WIP|wip).*"
+      - tag: "!changes-requested"
+    repos:
+      - https://github.com/sigstore/cosign
+
+   ### Daily Triage ####
   issue-needs-priority-overdue:
     name: "Unprioritized issues older than 7 days"
     resolution: "Add a priority/ or triage/ label"
@@ -104,38 +135,8 @@ rules:
     filters:
       - label: "priority/important-longterm"
       - updated: +180d
-
-  # Don't leave code reviews hanging
-  fulcio-pr-reviewable:
-    name: "Fulcio Pull Requests: Review Ready"
-    resolution: "Review requests or mark them as do-not-merge/work-in-progress"
-    type: pull_request
-    filters:
-      - title: "!.*(WIP|wip).*"
-      - tag: "!changes-requested"
-    repos:
-      - https://github.com/sigstore/fulcio
-
-  rekor-pr-reviewable:
-    name: "Rekor Pull Requests: Review Ready"
-    resolution: "Review requests or mark them as do-not-merge/work-in-progress"
-    type: pull_request
-    filters:
-      - title: "!.*(WIP|wip).*"
-      - tag: "!changes-requested"
-    repos:
-      - https://github.com/sigstore/rekor
-
-  cosign-pr-reviewable:
-    name: "Cosign Pull Requests: Review Ready"
-    resolution: "Review requests or mark them as do-not-merge/work-in-progress"
-    type: pull_request
-    filters:
-      - title: "!.*(WIP|wip).*"
-      - tag: "!changes-requested"
-    repos:
-      - https://github.com/sigstore/cosign
-
+ 
+ 
   # Issues missing initial feedback
   issue-needs-kind:
     name: "Unkinded Issues"
