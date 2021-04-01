@@ -1,17 +1,9 @@
 settings:
-  name: gosst
+  name: oss-fuzz
   repos:
     - https://github.com/google/oss-fuzz
 
 collections:
-  - id: PRs - fuzzing
-    name: OSS Fuzz PRs
-    description: >
-      Status of PRs in OSS-Fuzz
-    rules:
-      - prs-fuzz
-      - fuzz-pr-approved-stale
-      - fuzz-pr-unapproved-stale
   - id: Fuzzing Issues
     name: Fuzzing Issues
     dedup: true
@@ -28,6 +20,15 @@ collections:
       - fuzz-many-reactions
       - fuzz-many-commenters
       - fuzz-issue-zombies
+  - id: PRs - fuzzing
+    name: OSS Fuzz PRs
+    description: >
+      Status of PRs in OSS-Fuzz
+    rules:
+      - prs-fuzz
+      - fuzz-pr-approved-stale
+      - fuzz-pr-unapproved-stale
+
 
 rules:
   ### Pull requests
